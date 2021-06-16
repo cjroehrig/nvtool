@@ -1,0 +1,28 @@
+#==================================================
+# Blacklist (Last match has precedence)
+
+# exclude test cruft in the root (except whitelist below)
+/*.py
+/*
+
+# Python caches anywhere
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Exclude builds, tools, dev notes, downloads
+/dev
+/PKG/*
+
+
+#==================================================
+# Whitelist
+
+# for empty directories:
+!.gitkeep
+
+# Explicitly include our main files:
+!/nvtool.py
+!/README.md
+!/LICENCE.txt
+!/.gitignore
