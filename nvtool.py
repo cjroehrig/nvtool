@@ -400,7 +400,7 @@ class Router_FreshTomato_2021_3(Router):
 
     #==================================
     def to_rml(self, k, v):
-        k, v = super().to_rml
+        k, v = super().to_rml(k, v)
         if k == "bwl_rules":
             # add field 0: enable
             # add field 9: description
@@ -413,7 +413,7 @@ class Router_FreshTomato_2021_3(Router):
             # remove field 0: enable
             # remove field 9: description
             pass
-        k, v = super().from_rml
+        k, v = super().from_rml(k, v)
         return k, v
 
 
