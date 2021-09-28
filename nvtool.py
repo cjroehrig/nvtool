@@ -1142,6 +1142,7 @@ class NVFile_rml(NVFile):
                     # output special section:
                     tag = self.tag_keys[k]
                     tag_handler = TagSection(tag, k, nvdict)
+                    tag_handler.key = k
                     buf += "[{}:{}]\n".format(tag, k) # open tag
                     buf += tag_handler.emit(val)
                     buf += "[/{}]\n".format(tag)      # close tag
@@ -1754,16 +1755,22 @@ class TagSectionSpaces(TagSection):
         """
         pos = f['pos']
         if isinstance(pos, int):
-            nv = nvfields[pos]
-            # apply any hook
-            if f['hook']:
-                (emit_hook, parse_hook) = f['hook']
-                if emit_hook:
-                    val = emit_hook(self, self.nvdict, nv)
-                    dbg2("HOOK %s(%s) --> %s\n",
-                            emit_hook.__name__, str(nv), str(val))
+            if pos < len(nvfields):
+                nv = nvfields[pos]
+                # apply any hook
+                if f['hook']:
+                    (emit_hook, parse_hook) = f['hook']
+                    if emit_hook:
+                        val = emit_hook(self, self.nvdict, nv)
+                        dbg2("HOOK %s(%s) --> %s\n",
+                                emit_hook.__name__, str(nv), str(val))
+                else:
+                    val = nv
             else:
-                val = nv
+                warn("Too few fields to unpack for %s (%s): '%s'",
+                    self.key, self.__class__.__name__,  str(nvfields))
+                nv = None
+                val = "?"
         elif pos == 'number' and count is not None:
             nv = None
             val = count
