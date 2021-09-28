@@ -28,6 +28,7 @@ import gzip
 import re
 import random
 import math
+import traceback
 
 # Program version
 # NB: make sure there is alway an NVFile_rml subclass to handle it.
@@ -562,7 +563,6 @@ class NVFile(object):
         try:
             obj.nvdict = obj.reader(buf)
         except Exception:
-            import traceback
             warn("Error reading %s file", obj.ftype)
             traceback.print_exc()
             sys.exit(1)
@@ -1147,10 +1147,25 @@ class NVFile_rml(NVFile):
                 if k in self.tag_keys:
                     # output special section:
                     tag = self.tag_keys[k]
-                    tag_handler = TagSection(tag, k, nvdict)
-                    tag_handler.key = k
+                    try:
+                        tag_handler = TagSection(tag, k, nvdict)
+                        tag_buf = tag_handler.emit(val)
+                    except Exception:
+                        warn( "%s output failed for key %s; " +
+                               "falling back to tab-delimited",
+                                tag_handler.__class__.__name__, k)
+                        traceback.print_exc()
+                        buf += "# WARNING: ERROR "
+                        buf += "formatting '{}' using {}\n".format(
+                                        k, tag_handler.__class__.__name__)
+                        buf += '#{}={}\n'.format(k, val)
+                        # fallback to TAB section and output *something*
+                        tag = 'TAB'
+                        tag_handler = TagSection(tag, k, nvdict)
+                        tag_buf = tag_handler.emit(val)
+
                     buf += "[{}:{}]\n".format(tag, k) # open tag
-                    buf += tag_handler.emit(val)
+                    buf += tag_buf
                     buf += "[/{}]\n".format(tag)      # close tag
                 else:
                     buf += '{}={}\n'.format(k, val)
@@ -1265,7 +1280,9 @@ class TagSection(object):
         """
         for c in all_subclasses(cls):
             if c.tag and c.tag == tag:
-                return super().__new__(c)
+                obj = super().__new__(c)
+                obj.key = key
+                return obj
         error("Unknown RML section tag: %s", tag)
         return cls
 
