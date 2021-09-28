@@ -559,7 +559,13 @@ class NVFile(object):
         obj.was_zipped = gzipped
 
         # convert file buffer to our nvdict
-        obj.nvdict = obj.reader(buf)
+        try:
+            obj.nvdict = obj.reader(buf)
+        except Exception:
+            import traceback
+            warn("Error reading %s file", obj.ftype)
+            traceback.print_exc()
+            sys.exit(1)
 
         return obj
 
