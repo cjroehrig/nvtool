@@ -2,7 +2,16 @@
 
 A tool to convert Tomato router NVRAM files to/from various formats.
 
-NB: this is a work in progress.
+To convert from a FreshTomato backup .cfg file to a human-readable file:
+
+	nvtool.py  mybackup.cfg  mybackup.expq
+
+To convert back to an ARM FreshTomato backup:
+
+	nvtool.py -o hdr2  mybackup.expq  mybackup.cfg
+
+
+NB: this is a work in progress
 
 
 ```
